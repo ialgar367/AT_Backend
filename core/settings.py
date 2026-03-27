@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'context.accounts',
+    'context.manager',
+    'context.backoffice',
 ]
 
 MIDDLEWARE = [
