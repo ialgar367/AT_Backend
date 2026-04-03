@@ -1,8 +1,11 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage
 from .models import Anime, Episode
 import json
+import requests
+from django.core.cache import cache
 
 
 def admin_only(view_func):
@@ -20,7 +23,24 @@ def admin_only(view_func):
 @require_http_methods(["GET", "POST"])
 def anime_list(request):
     if request.method == "GET":
+        # Obtener parámetros de paginación
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 20))
+        
+        # Validar page_size
+        if page_size > 100:
+            page_size = 100
+        if page_size < 1:
+            page_size = 20
+        
         animes = Anime.objects.all()
+        paginator = Paginator(animes, page_size)
+        
+        try:
+            page_obj = paginator.get_page(page)
+        except EmptyPage:
+            page_obj = paginator.get_page(1)
+        
         data = [{
             'id': anime.id,
             'title': anime.title,
@@ -30,8 +50,16 @@ def anime_list(request):
             'cover_image': anime.cover_image,
             'background_image': anime.background_image,
             'rating': float(anime.rating),
-        } for anime in animes]
-        return JsonResponse(data, safe=False)
+        } for anime in page_obj]
+        
+        return JsonResponse({
+            'results': data,
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': page_obj.number,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+        }, safe=False)
     
     elif request.method == "POST":
         try:
@@ -113,11 +141,28 @@ def anime_detail(request, pk):
 @require_http_methods(["GET", "POST"])
 def episode_list(request):
     if request.method == "GET":
+        # Obtener parámetros de paginación y filtros
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 50))
         anime_id = request.GET.get('anime_id')
+        
+        # Validar page_size
+        if page_size > 200:
+            page_size = 200
+        if page_size < 1:
+            page_size = 50
+        
         if anime_id:
             episodes = Episode.objects.filter(anime_id=anime_id)
         else:
             episodes = Episode.objects.all()
+        
+        paginator = Paginator(episodes, page_size)
+        
+        try:
+            page_obj = paginator.get_page(page)
+        except EmptyPage:
+            page_obj = paginator.get_page(1)
         
         data = [{
             'id': episode.id,
@@ -128,8 +173,16 @@ def episode_list(request):
             'duration': episode.duration,
             'video_url': episode.video_url,
             'thumbnail': episode.thumbnail,
-        } for episode in episodes]
-        return JsonResponse(data, safe=False)
+        } for episode in page_obj]
+        
+        return JsonResponse({
+            'results': data,
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': page_obj.number,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+        })
     
     elif request.method == "POST":
         if request.user.username != 'admin':
@@ -212,3 +265,220 @@ def episode_detail(request, pk):
         
         episode.delete()
         return JsonResponse({'success': True}, status=204)
+
+
+# ========== ENDPOINTS PÚBLICOS PARA USUARIOS ==========
+
+@login_required
+@require_http_methods(["GET"])
+def public_anime_list(request):
+    """Endpoint público para que todos los usuarios vean los animes"""
+    # Obtener parámetros de paginación
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 20))
+    
+    # Validar page_size
+    if page_size > 100:
+        page_size = 100
+    if page_size < 1:
+        page_size = 20
+    
+    animes = Anime.objects.all()
+    paginator = Paginator(animes, page_size)
+    
+    try:
+        page_obj = paginator.get_page(page)
+    except EmptyPage:
+        page_obj = paginator.get_page(1)
+    
+    data = [{
+        'id': anime.id,
+        'title': anime.title,
+        'year': anime.year,
+        'genre': anime.genre,
+        'description': anime.description,
+        'cover_image': anime.cover_image,
+        'background_image': anime.background_image,
+        'rating': float(anime.rating),
+    } for anime in page_obj]
+    
+    return JsonResponse({
+        'results': data,
+        'count': paginator.count,
+        'num_pages': paginator.num_pages,
+        'current_page': page_obj.number,
+        'has_next': page_obj.has_next(),
+        'has_previous': page_obj.has_previous(),
+    }, safe=False)
+
+
+@login_required
+@require_http_methods(["GET"])
+def public_anime_detail(request, pk):
+    """Endpoint público para que todos los usuarios vean detalles de un anime"""
+    try:
+        anime = Anime.objects.get(pk=pk)
+    except Anime.DoesNotExist:
+        return JsonResponse({'error': 'Anime not found'}, status=404)
+    
+    return JsonResponse({
+        'id': anime.id,
+        'title': anime.title,
+        'year': anime.year,
+        'genre': anime.genre,
+        'description': anime.description,
+        'cover_image': anime.cover_image,
+        'background_image': anime.background_image,
+        'rating': float(anime.rating),
+    })
+
+
+# ========== JIKAN API INTEGRATION ==========
+
+JIKAN_BASE_URL = "https://api.jikan.moe/v4"
+
+@admin_only
+@require_http_methods(["GET"])
+def jikan_search(request):
+    """Buscar animes en Jikan API (MyAnimeList)"""
+    query = request.GET.get('q', '').strip()
+    
+    if not query:
+        return JsonResponse({'error': 'Query parameter "q" is required'}, status=400)
+    
+    # Cache key basada en la búsqueda (sanitizar para evitar caracteres especiales)
+    cache_key = f'jikan_search_{query.replace(" ", "_")}'
+    cached_result = cache.get(cache_key)
+    
+    if cached_result:
+        return JsonResponse(cached_result)
+    
+    try:
+        # Llamar a Jikan API
+        response = requests.get(
+            f"{JIKAN_BASE_URL}/anime",
+            params={'q': query, 'limit': 10},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Transformar datos de Jikan a nuestro formato
+            results = []
+            for anime in data.get('data', []):
+                # Extraer géneros
+                genres = ', '.join([g['name'] for g in anime.get('genres', [])[:3]])
+                
+                # Obtener año
+                year = anime.get('year') or (
+                    anime.get('aired', {}).get('prop', {}).get('from', {}).get('year')
+                )
+                
+                # Manejar score que puede ser None
+                score = anime.get('score')
+                rating = round(score, 1) if score is not None else 0.0
+                
+                results.append({
+                    'mal_id': anime.get('mal_id'),
+                    'title': anime.get('title'),
+                    'title_english': anime.get('title_english'),
+                    'year': year,
+                    'genre': genres or 'Sin género',
+                    'description': anime.get('synopsis', ''),
+                    'cover_image': anime.get('images', {}).get('jpg', {}).get('large_image_url', ''),
+                    'background_image': anime.get('images', {}).get('jpg', {}).get('large_image_url', ''),
+                    'rating': rating,
+                    'episodes': anime.get('episodes'),
+                    'status': anime.get('status'),
+                })
+            
+            result = {'results': results}
+            
+            # Cachear por 1 hora
+            cache.set(cache_key, result, 3600)
+            
+            return JsonResponse(result)
+        
+        elif response.status_code == 429:
+            return JsonResponse({
+                'error': 'Jikan API rate limit exceeded. Please try again later.'
+            }, status=429)
+        
+        else:
+            return JsonResponse({
+                'error': f'Jikan API error: {response.status_code}'
+            }, status=response.status_code)
+    
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Jikan API timeout'}, status=504)
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
+
+
+@admin_only
+@require_http_methods(["GET"])
+def jikan_anime_detail(request, mal_id):
+    """Obtener detalles completos de un anime desde Jikan API"""
+    cache_key = f'jikan_anime_{mal_id}'
+    cached_result = cache.get(cache_key)
+    
+    if cached_result:
+        return JsonResponse(cached_result)
+    
+    try:
+        response = requests.get(
+            f"{JIKAN_BASE_URL}/anime/{mal_id}",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            anime = response.json().get('data', {})
+            
+            # Extraer géneros
+            genres = ', '.join([g['name'] for g in anime.get('genres', [])])
+            
+            # Obtener año
+            year = anime.get('year') or (
+                anime.get('aired', {}).get('prop', {}).get('from', {}).get('year')
+            )
+            
+            # Manejar score que puede ser None
+            score = anime.get('score')
+            rating = round(score, 1) if score is not None else 0.0
+            
+            result = {
+                'mal_id': anime.get('mal_id'),
+                'title': anime.get('title'),
+                'title_english': anime.get('title_english'),
+                'year': year,
+                'genre': genres or 'Sin género',
+                'description': anime.get('synopsis', ''),
+                'cover_image': anime.get('images', {}).get('jpg', {}).get('large_image_url', ''),
+                'background_image': anime.get('images', {}).get('jpg', {}).get('large_image_url', ''),
+                'rating': rating,
+                'episodes': anime.get('episodes'),
+                'status': anime.get('status'),
+                'duration': anime.get('duration'),
+                'studios': ', '.join([s['name'] for s in anime.get('studios', [])]),
+            }
+            
+            # Cachear por 24 horas
+            cache.set(cache_key, result, 86400)
+            
+            return JsonResponse(result)
+        
+        elif response.status_code == 429:
+            return JsonResponse({
+                'error': 'Jikan API rate limit exceeded. Please try again later.'
+            }, status=429)
+        
+        else:
+            return JsonResponse({
+                'error': f'Jikan API error: {response.status_code}'
+            }, status=response.status_code)
+    
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Jikan API timeout'}, status=504)
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
