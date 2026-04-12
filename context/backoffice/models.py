@@ -5,6 +5,20 @@ from datetime import datetime
 
 
 class Anime(models.Model):
+    AUDIO_CHOICES = [
+        ('SUB', 'Subtitulado'),
+        ('DUB', 'Doblado'),
+        ('BOTH', 'Sub y Dub'),
+    ]
+    
+    AGE_RATING_CHOICES = [
+        ('TV-Y', 'TV-Y'),
+        ('TV-PG', 'TV-PG'),
+        ('TV-14', 'TV-14'),
+        ('TV-MA', 'TV-MA'),
+        ('R', 'R'),
+    ]
+    
     title = models.CharField(max_length=255)
     year = models.IntegerField(
         validators=[
@@ -25,6 +39,16 @@ class Anime(models.Model):
             MaxValueValidator(10.0, message="La calificación no puede ser mayor a 10.0")
         ]
     )
+    audio_type = models.CharField(max_length=10, choices=AUDIO_CHOICES, default='SUB')
+    age_rating = models.CharField(max_length=10, choices=AGE_RATING_CHOICES, default='TV-14')
+    is_simulcast = models.BooleanField(default=False)
+    episode_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    anime_slug = models.CharField(
+        max_length=255, 
+        blank=True, 
+        help_text='Slug para búsqueda en GogoAnime (ej: one-piece, naruto-shippuden)'
+    )
+    
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,3 +84,32 @@ class Episode(models.Model):
 
     def __str__(self):
         return f'{self.anime.title} - Episodio {self.episode_number}'
+
+
+class WatchProgress(models.Model):
+    """
+    Modelo para rastrear el progreso de visualización de un usuario en un anime
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='watch_progress')
+    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='user_progress')
+    current_episode = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text="Último episodio visto completamente"
+    )
+    watched = models.BooleanField(
+        default=False,
+        help_text="True si el usuario completó toda la serie"
+    )
+    last_watched = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'anime']
+        ordering = ['-last_watched']
+        verbose_name = 'Watch Progress'
+        verbose_name_plural = 'Watch Progress'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.anime.title} (Ep. {self.current_episode})"
+

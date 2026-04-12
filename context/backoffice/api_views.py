@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
-from .models import Anime, Episode
+from .models import Anime, Episode, WatchProgress
 import json
 import requests
 from django.core.cache import cache
@@ -52,6 +52,11 @@ def anime_list(request):
             'cover_image': anime.cover_image,
             'background_image': anime.background_image,
             'rating': float(anime.rating),
+            'audio_type': anime.audio_type,
+            'age_rating': anime.age_rating,
+            'is_simulcast': anime.is_simulcast,
+            'episode_count': anime.episode_count,
+            'created_at': anime.created_at.isoformat(),
         } for anime in page_obj]
         
         return JsonResponse({
@@ -74,6 +79,10 @@ def anime_list(request):
                 cover_image=data.get('cover_image', ''),
                 background_image=data.get('background_image', ''),
                 rating=data.get('rating', 0.0),
+                audio_type=data.get('audio_type', 'SUB'),
+                age_rating=data.get('age_rating', 'TV-14'),
+                is_simulcast=data.get('is_simulcast', False),
+                episode_count=data.get('episode_count', 0),
                 created_by=request.user,
             )
             return JsonResponse({
@@ -85,6 +94,10 @@ def anime_list(request):
                 'cover_image': anime.cover_image,
                 'background_image': anime.background_image,
                 'rating': float(anime.rating),
+                'audio_type': anime.audio_type,
+                'age_rating': anime.age_rating,
+                'is_simulcast': anime.is_simulcast,
+                'episode_count': anime.episode_count,
             }, status=201)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
@@ -108,6 +121,10 @@ def anime_detail(request, pk):
             'cover_image': anime.cover_image,
             'background_image': anime.background_image,
             'rating': float(anime.rating),
+            'audio_type': anime.audio_type,
+            'age_rating': anime.age_rating,
+            'is_simulcast': anime.is_simulcast,
+            'episode_count': anime.episode_count,
         })
     
     elif request.method == "PUT":
@@ -120,6 +137,10 @@ def anime_detail(request, pk):
             anime.cover_image = data.get('cover_image', anime.cover_image)
             anime.background_image = data.get('background_image', anime.background_image)
             anime.rating = data.get('rating', anime.rating)
+            anime.audio_type = data.get('audio_type', anime.audio_type)
+            anime.age_rating = data.get('age_rating', anime.age_rating)
+            anime.is_simulcast = data.get('is_simulcast', anime.is_simulcast)
+            anime.episode_count = data.get('episode_count', anime.episode_count)
             anime.save()
             return JsonResponse({
                 'id': anime.id,
@@ -130,6 +151,10 @@ def anime_detail(request, pk):
                 'cover_image': anime.cover_image,
                 'background_image': anime.background_image,
                 'rating': float(anime.rating),
+                'audio_type': anime.audio_type,
+                'age_rating': anime.age_rating,
+                'is_simulcast': anime.is_simulcast,
+                'episode_count': anime.episode_count,
             })
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
@@ -302,6 +327,11 @@ def public_anime_list(request):
         'cover_image': anime.cover_image,
         'background_image': anime.background_image,
         'rating': float(anime.rating),
+        'audio_type': anime.audio_type,
+        'age_rating': anime.age_rating,
+        'is_simulcast': anime.is_simulcast,
+        'episode_count': anime.episode_count,
+        'created_at': anime.created_at.isoformat(),
     } for anime in page_obj]
     
     return JsonResponse({
@@ -332,6 +362,10 @@ def public_anime_detail(request, pk):
         'cover_image': anime.cover_image,
         'background_image': anime.background_image,
         'rating': float(anime.rating),
+        'audio_type': anime.audio_type,
+        'age_rating': anime.age_rating,
+        'is_simulcast': anime.is_simulcast,
+        'episode_count': anime.episode_count,
     })
 
 
@@ -527,3 +561,207 @@ def public_anime_list(request):
         'has_next': page_obj.has_next(),
         'has_previous': page_obj.has_previous(),
     }, safe=False)
+
+
+# ===== CONSUMET API ENDPOINTS =====
+
+@login_required
+@require_http_methods(["GET"])
+def get_consumet_sources(request, anime_slug, episode_number):
+    """
+    Proxy endpoint para obtener fuentes de video de Consumet API
+    anime_slug: nombre del anime en formato gogoanime (ej: "one-piece")
+    episode_number: número del episodio
+    """
+    try:
+        # Construir URL de Consumet
+        url = f"https://api.consumet.org/anime/gogoanime/watch/{anime_slug}-episode-{episode_number}"
+        
+        # Hacer request a Consumet con timeout
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return JsonResponse(data)
+        else:
+            return JsonResponse({
+                'error': f'Consumet API error: {response.status_code}',
+                'message': 'No se pudieron obtener las fuentes de video'
+            }, status=response.status_code)
+            
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Consumet API timeout'}, status=504)
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
+
+
+@login_required
+@require_http_methods(["GET"])
+def search_consumet_anime(request):
+    """
+    Buscar animes en Consumet/GogoAnime
+    """
+    query = request.GET.get('q', '')
+    
+    if not query:
+        return JsonResponse({'error': 'Query parameter "q" is required'}, status=400)
+    
+    try:
+        url = f"https://api.consumet.org/anime/gogoanime/{query}"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return JsonResponse(data)
+        else:
+            return JsonResponse({
+                'error': f'Consumet API error: {response.status_code}'
+            }, status=response.status_code)
+            
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Consumet API timeout'}, status=504)
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_consumet_episodes(request, anime_id):
+    """
+    Obtener lista de episodios de Consumet para un anime ID de GogoAnime
+    anime_id: ID del anime en GogoAnime (ej: "one-piece")
+    """
+    try:
+        url = f"https://api.consumet.org/anime/gogoanime/info/{anime_id}"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Extraer solo los episodios
+            episodes = data.get('episodes', [])
+            return JsonResponse({
+                'episodes': episodes,
+                'totalEpisodes': len(episodes)
+            })
+        else:
+            return JsonResponse({
+                'error': f'Consumet API error: {response.status_code}'
+            }, status=response.status_code)
+            
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Consumet API timeout'}, status=504)
+    except requests.exceptions.RequestException as e:
+       return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
+
+
+# ===== WATCH PROGRESS ENDPOINTS =====
+
+@login_required
+@require_http_methods(["GET"])
+def user_progress_list(request):
+    """
+    Obtener todo el progreso de visualización del usuario actual
+    """
+    try:
+        progress_list = WatchProgress.objects.filter(user=request.user).select_related('anime')
+        
+        data = [{
+            'anime_id': p.anime.id,
+            'anime_title': p.anime.title,
+            'anime_cover': p.anime.cover_image,
+            'current_episode': p.current_episode,
+            'total_episodes': p.anime.episode_count,
+            'watched': p.watched,
+            'last_watched': p.last_watched.isoformat()
+        } for p in progress_list]
+        
+        return JsonResponse({'progress': data})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def anime_progress(request, anime_id):
+    """
+    GET: Obtener progreso de un anime específico
+    POST: Actualizar progreso de un anime
+    """
+    try:
+        anime = Anime.objects.get(id=anime_id)
+    except Anime.DoesNotExist:
+        return JsonResponse({'error': 'Anime not found'}, status=404)
+    
+    if request.method == 'GET':
+        try:
+            progress = WatchProgress.objects.get(user=request.user, anime=anime)
+            return JsonResponse({
+                'anime_id': anime.id,
+                'current_episode': progress.current_episode,
+                'watched': progress.watched,
+                'total_episodes': anime.episode_count,
+                'last_watched': progress.last_watched.isoformat()
+            })
+        except WatchProgress.DoesNotExist:
+            # No hay progreso aún, retornar valores por defecto
+            return JsonResponse({
+                'anime_id': anime.id,
+                'current_episode': 0,
+                'watched': False,
+                'total_episodes': anime.episode_count,
+                'last_watched': None
+            })
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            current_episode = data.get('current_episode', 0)
+            watched = data.get('watched', False)
+            
+            # Validar que current_episode no exceda el total
+            if current_episode > anime.episode_count:
+                current_episode = anime.episode_count
+            
+            # Si llegó al último episodio, marcar como watched
+            if current_episode >= anime.episode_count and anime.episode_count > 0:
+                watched = True
+            
+            # Actualizar o crear progreso
+            progress, created = WatchProgress.objects.update_or_create(
+                user=request.user,
+                anime=anime,
+                defaults={
+                    'current_episode': current_episode,
+                    'watched': watched
+                }
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'anime_id': anime.id,
+                'current_episode': progress.current_episode,
+                'watched': progress.watched
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_progress(request, anime_id):
+    """
+    Eliminar progreso de un anime (resetear)
+    """
+    try:
+        anime = Anime.objects.get(id=anime_id)
+        WatchProgress.objects.filter(user=request.user, anime=anime).delete()
+        return JsonResponse({'success': True, 'message': 'Progress deleted'})
+    except Anime.DoesNotExist:
+        return JsonResponse({'error': 'Anime not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+

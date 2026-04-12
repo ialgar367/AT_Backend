@@ -17,4 +17,14 @@ urlpatterns = [
     # Jikan API Integration (solo admin)
     path('jikan/search/', api_views.jikan_search, name='jikan_search'),
     path('jikan/anime/<int:mal_id>/', api_views.jikan_anime_detail, name='jikan_anime_detail'),
+    
+    # Consumet API Integration (usuarios autenticados)
+    path('consumet/sources/<str:anime_slug>/<int:episode_number>/', api_views.get_consumet_sources, name='consumet_sources'),
+    path('consumet/search/', api_views.search_consumet_anime, name='consumet_search'),
+    path('consumet/episodes/<str:anime_id>/', api_views.get_consumet_episodes, name='consumet_episodes'),
+    
+    # Watch Progress (usuarios autenticados)
+    path('progress/', api_views.user_progress_list, name='user_progress_list'),
+    path('progress/<int:anime_id>/', api_views.anime_progress, name='anime_progress'),
+    path('progress/<int:anime_id>/delete/', api_views.delete_progress, name='delete_progress'),
 ]
