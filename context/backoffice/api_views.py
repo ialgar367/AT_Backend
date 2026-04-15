@@ -444,18 +444,31 @@ def jikan_search(request):
         
         elif response.status_code == 429:
             return JsonResponse({
-                'error': 'Jikan API rate limit exceeded. Please try again later.'
+                'error': 'Jikan API rate limit exceeded. Please try again in a few seconds.',
+                'message': 'La API de MyAnimeList está limitando las solicitudes. Intenta de nuevo en unos segundos.'
             }, status=429)
         
         else:
             return JsonResponse({
-                'error': f'Jikan API error: {response.status_code}'
+                'error': f'Jikan API error: {response.status_code}',
+                'message': f'Error al conectar con MyAnimeList API (código {response.status_code})'
             }, status=response.status_code)
     
     except requests.exceptions.Timeout:
-        return JsonResponse({'error': 'Jikan API timeout'}, status=504)
+        return JsonResponse({
+            'error': 'Jikan API timeout',
+            'message': 'La API de MyAnimeList no respondió a tiempo. Por favor, intenta de nuevo.'
+        }, status=504)
     except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
+        return JsonResponse({
+            'error': f'Connection error: {str(e)}',
+            'message': 'Error de conexión con MyAnimeList API. Verifica tu conexión a internet.'
+        }, status=503)
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Unexpected error: {str(e)}',
+            'message': 'Error inesperado al procesar la búsqueda.'
+        }, status=500)
 
 
 @admin_only
@@ -574,47 +587,88 @@ def public_anime_list(request):
     }, safe=False)
 
 
-# ===== CONSUMET API ENDPOINTS =====
+# ===== VIDEO SOURCES ENDPOINTS =====
 
 @login_required
 @require_http_methods(["GET"])
 def get_consumet_sources(request, anime_slug, episode_number):
     """
-    Proxy endpoint para obtener fuentes de video de Consumet API
-    anime_slug: nombre del anime en formato gogoanime (ej: "one-piece")
+    Obtener fuentes de video desde la base de datos
+    anime_slug: nombre del anime en formato slug (ej: "one-piece")
     episode_number: número del episodio
     """
+    from .models import Anime, Episode
+    
     try:
-        # Construir URL de Consumet
-        url = f"https://api.consumet.org/anime/gogoanime/watch/{anime_slug}-episode-{episode_number}"
+        # Buscar anime y episodio en la base de datos
+        anime = Anime.objects.get(anime_slug=anime_slug)
+        episode = Episode.objects.get(anime=anime, episode_number=episode_number)
         
-        # Headers para evitar bloqueos
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Origin': 'https://anitaku.pe',
-            'Referer': 'https://anitaku.pe/',
-        }
-        
-        # Hacer request a Consumet con timeout y headers
-        response = requests.get(url, headers=headers, timeout=15)
-        
-        if response.status_code == 200:
-            data = response.json()
-            return JsonResponse(data)
-        else:
+        if episode.video_url:
+            print(f"[VIDEO] ✓ Video encontrado: {anime.title} - Episodio {episode_number}")
             return JsonResponse({
-                'error': f'Consumet API error: {response.status_code}',
-                'message': 'No se pudieron obtener las fuentes de video',
-                'url': url
-            }, status=response.status_code)
+                'sources': [{
+                    'url': episode.video_url,
+                    'quality': 'default',
+                    'isM3U8': episode.video_url.endswith('.m3u8') or 'm3u8' in episode.video_url
+                }],
+                'headers': {},
+                'download': '',
+                'source': 'database'
+            })
+        else:
+            print(f"[VIDEO] ⚠️ Episodio sin video_url: {anime.title} - Episodio {episode_number}")
+            return JsonResponse({
+                'sources': [{
+                    'url': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+                    'quality': 'default',
+                    'isM3U8': True
+                }],
+                'headers': {},
+                'download': '',
+                'fallback': True,
+                'message': f'El episodio {episode_number} no tiene video configurado. Mostrando video de demostración.'
+            })
             
-    except requests.exceptions.Timeout:
-        return JsonResponse({'error': 'Consumet API timeout'}, status=504)
-    except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': f'Connection error: {str(e)}'}, status=503)
+    except Anime.DoesNotExist:
+        print(f"[VIDEO] ✗ No se encontró anime con slug: {anime_slug}")
+        return JsonResponse({
+            'error': 'Anime no encontrado',
+            'message': f'No existe un anime con el slug "{anime_slug}"'
+        }, status=404)
+        
+    except Episode.DoesNotExist:
+        print(f"[VIDEO] ✗ No se encontró episodio {episode_number} para {anime_slug}")
+        return JsonResponse({
+            'error': 'Episodio no encontrado',
+            'message': f'El episodio {episode_number} no existe para este anime'
+        }, status=404)
+        
+    except Exception as e:
+        print(f"[VIDEO] ✗ Error: {str(e)}")
+        return JsonResponse({
+            'error': 'Error del servidor',
+            'message': str(e)
+        }, status=500)
+    
+    return JsonResponse({
+        'sources': [
+            {
+                'url': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+                'quality': 'default',
+                'isM3U8': True
+            }
+        ],
+        'headers': {
+            'Referer': 'https://gogoanime.hu/'
+        },
+        'download': '',
+        'fallback': True,
+        'message': 'API de Consumet no disponible. Mostrando video de demostración.',
+        'errors': errors,
+        'anime_slug': anime_slug,
+        'episode': episode_number
+    })
 
 
 @login_required
