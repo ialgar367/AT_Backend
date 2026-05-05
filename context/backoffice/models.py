@@ -19,6 +19,13 @@ class Anime(models.Model):
         ('R', 'R'),
     ]
     
+    CONTENT_TYPE_CHOICES = [
+        ('SERIE', 'Serie'),
+        ('PELÍCULA', 'Película'),
+        ('OVA', 'OVA'),
+        ('ESPECIAL', 'Especial'),
+    ]
+    
     title = models.CharField(max_length=255)
     year = models.IntegerField(
         validators=[
@@ -41,6 +48,7 @@ class Anime(models.Model):
     )
     audio_type = models.CharField(max_length=10, choices=AUDIO_CHOICES, default='SUB')
     age_rating = models.CharField(max_length=10, choices=AGE_RATING_CHOICES, default='TV-14')
+    content_type = models.CharField(max_length=10, choices=CONTENT_TYPE_CHOICES, default='SERIE')
     is_simulcast = models.BooleanField(default=False)
     episode_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     anime_slug = models.CharField(
