@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
+from context.manager.models import Profile
 
 
 @require_GET
@@ -44,6 +45,16 @@ def register_api(request):
         return JsonResponse({'detail': 'El email ya está registrado.'}, status=400)
 
     user = User.objects.create_user(username=username, email=email, password=password)
+    
+    # Crear perfil por defecto
+    Profile.objects.create(
+        user=user,
+        name=username,
+        avatar='/profiles/Profile1.png',
+        background='',
+        color='#000000'
+    )
+    
     login(request, user)
 
     return JsonResponse(

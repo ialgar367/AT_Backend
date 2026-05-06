@@ -96,10 +96,10 @@ class Episode(models.Model):
 
 class WatchProgress(models.Model):
     """
-    Modelo para rastrear el progreso de visualización de un usuario en un anime
+    Modelo para rastrear el progreso de visualización de un perfil en un anime
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='watch_progress')
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='user_progress')
+    profile = models.ForeignKey('manager.Profile', on_delete=models.CASCADE, related_name='watch_progress')
+    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='profile_progress')
     current_episode = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)],
@@ -107,17 +107,17 @@ class WatchProgress(models.Model):
     )
     watched = models.BooleanField(
         default=False,
-        help_text="True si el usuario completó toda la serie"
+        help_text="True si el perfil completó toda la serie"
     )
     last_watched = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['user', 'anime']
+        unique_together = ['profile', 'anime']
         ordering = ['-last_watched']
         verbose_name = 'Watch Progress'
         verbose_name_plural = 'Watch Progress'
 
     def __str__(self):
-        return f"{self.user.username} - {self.anime.title} (Ep. {self.current_episode})"
+        return f"{self.profile.name} - {self.anime.title} (Ep. {self.current_episode})"
 

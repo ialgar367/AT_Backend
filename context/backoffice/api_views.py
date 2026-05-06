@@ -687,10 +687,22 @@ def get_consumet_episodes(request, anime_id):
 @require_http_methods(["GET"])
 def user_progress_list(request):
     """
-    Obtener todo el progreso de visualización del usuario actual
+    Obtener todo el progreso de visualización del perfil actual
     """
     try:
-        progress_list = WatchProgress.objects.filter(user=request.user).select_related('anime')
+        profile_id = request.session.get('current_profile_id') or request.GET.get('profile_id')
+        
+        if not profile_id:
+            return JsonResponse({'error': 'No profile selected'}, status=400)
+        
+        # Verificar que el perfil pertenece al usuario
+        from context.manager.models import Profile
+        try:
+            profile = Profile.objects.get(pk=profile_id, user=request.user)
+        except Profile.DoesNotExist:
+            return JsonResponse({'error': 'Profile not found'}, status=404)
+        
+        progress_list = WatchProgress.objects.filter(profile=profile).select_related('anime')
         
         data = [{
             'anime_id': p.anime.id,
@@ -712,17 +724,33 @@ def user_progress_list(request):
 @require_http_methods(["GET", "POST"])
 def anime_progress(request, anime_id):
     """
-    GET: Obtener progreso de un anime específico
-    POST: Actualizar progreso de un anime
+    GET: Obtener progreso de un anime específico para el perfil actual
+    POST: Actualizar progreso de un anime para el perfil actual
     """
     try:
         anime = Anime.objects.get(id=anime_id)
     except Anime.DoesNotExist:
         return JsonResponse({'error': 'Anime not found'}, status=404)
     
+    # Obtener perfil actual
+    profile_id = request.session.get('current_profile_id') or request.GET.get('profile_id')
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        profile_id = profile_id or data.get('profile_id')
+    
+    if not profile_id:
+        return JsonResponse({'error': 'No profile selected'}, status=400)
+    
+    # Verificar que el perfil pertenece al usuario
+    from context.manager.models import Profile
+    try:
+        profile = Profile.objects.get(pk=profile_id, user=request.user)
+    except Profile.DoesNotExist:
+        return JsonResponse({'error': 'Profile not found'}, status=404)
+    
     if request.method == 'GET':
         try:
-            progress = WatchProgress.objects.get(user=request.user, anime=anime)
+            progress = WatchProgress.objects.get(profile=profile, anime=anime)
             return JsonResponse({
                 'anime_id': anime.id,
                 'current_episode': progress.current_episode,
@@ -742,7 +770,6 @@ def anime_progress(request, anime_id):
     
     elif request.method == 'POST':
         try:
-            data = json.loads(request.body)
             current_episode = data.get('current_episode', 0)
             watched = data.get('watched', False)
             
@@ -756,7 +783,7 @@ def anime_progress(request, anime_id):
             
             # Actualizar o crear progreso
             progress, created = WatchProgress.objects.update_or_create(
-                user=request.user,
+                profile=profile,
                 anime=anime,
                 defaults={
                     'current_episode': current_episode,
@@ -781,11 +808,23 @@ def anime_progress(request, anime_id):
 @require_http_methods(["DELETE"])
 def delete_progress(request, anime_id):
     """
-    Eliminar progreso de un anime (resetear)
+    Eliminar progreso de un anime (resetear) para el perfil actual
     """
     try:
         anime = Anime.objects.get(id=anime_id)
-        WatchProgress.objects.filter(user=request.user, anime=anime).delete()
+        
+        profile_id = request.session.get('current_profile_id') or request.GET.get('profile_id')
+        if not profile_id:
+            return JsonResponse({'error': 'No profile selected'}, status=400)
+        
+        # Verificar que el perfil pertenece al usuario
+        from context.manager.models import Profile
+        try:
+            profile = Profile.objects.get(pk=profile_id, user=request.user)
+        except Profile.DoesNotExist:
+            return JsonResponse({'error': 'Profile not found'}, status=404)
+        
+        WatchProgress.objects.filter(profile=profile, anime=anime).delete()
         return JsonResponse({'success': True, 'message': 'Progress deleted'})
     except Anime.DoesNotExist:
         return JsonResponse({'error': 'Anime not found'}, status=404)
