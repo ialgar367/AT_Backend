@@ -13,6 +13,8 @@ urlpatterns = [
     # Endpoints públicos (todos los usuarios autenticados)
     path('public/animes/', api_views.public_anime_list, name='public_anime_list'),
     path('public/animes/<int:pk>/', api_views.public_anime_detail, name='public_anime_detail'),
+    path('public/animes/<int:pk>/likes/', api_views.update_anime_likes, name='update_anime_likes'),
+    path('public/animes/<int:pk>/dislikes/', api_views.update_anime_dislikes, name='update_anime_dislikes'),
     
     # Jikan API Integration (solo admin)
     path('jikan/search/', api_views.jikan_search, name='jikan_search'),
