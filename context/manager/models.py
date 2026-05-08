@@ -20,3 +20,18 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.name}'
+
+
+class Watchlist(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='watchlist')
+    anime = models.ForeignKey('backoffice.Anime', on_delete=models.CASCADE, related_name='in_watchlists')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-added_at']
+        unique_together = ('profile', 'anime')
+        verbose_name = 'Watchlist Item'
+        verbose_name_plural = 'Watchlist Items'
+
+    def __str__(self):
+        return f'{self.profile.name} - {self.anime.title}'

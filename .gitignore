@@ -18,9 +18,9 @@ build/
 # Django
 *.log
 db.sqlite3-journal
-/media
 /staticfiles
 /static_collected
+/media
 
 # Environment variables
 .env
