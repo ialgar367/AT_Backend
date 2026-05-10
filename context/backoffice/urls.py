@@ -29,4 +29,7 @@ urlpatterns = [
     path('progress/', api_views.user_progress_list, name='user_progress_list'),
     path('progress/<int:anime_id>/', api_views.anime_progress, name='anime_progress'),
     path('progress/<int:anime_id>/delete/', api_views.delete_progress, name='delete_progress'),
+    
+    # Analytics (usuarios autenticados)
+    path('analytics/', api_views.analytics_metrics, name='analytics_metrics'),
 ]

@@ -886,3 +886,149 @@ def delete_progress(request, anime_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
+# ===== ANALYTICS ENDPOINTS =====
+
+@login_required
+@require_http_methods(["GET"])
+def analytics_metrics(request):
+    """
+    Obtener métricas generales de la plataforma
+    """
+    from django.contrib.auth.models import User
+    from context.manager.models import Watchlist, Profile
+    from django.db.models import Count, Avg, Q, Sum
+    from datetime import timedelta
+    from django.utils import timezone
+    
+    try:
+        # Métricas básicas
+        total_animes = Anime.objects.count()
+        total_episodes = Episode.objects.count()
+        total_users = User.objects.count()
+        total_profiles = Profile.objects.count()
+        total_watchlist_items = Watchlist.objects.count()
+        
+        # Rating promedio de la plataforma
+        avg_rating = Anime.objects.aggregate(Avg('rating'))['rating__avg'] or 0.0
+        
+        # Distribución por tipo de audio
+        audio_distribution = list(Anime.objects.values('audio_type').annotate(count=Count('id')))
+        
+        # Distribución por géneros (top 10)
+        from collections import Counter
+        all_genres = []
+        try:
+            for anime in Anime.objects.all():
+                if anime.genre:
+                    genres = [g.strip() for g in anime.genre.split(',')]
+                    all_genres.extend(genres)
+            genre_counter = Counter(all_genres)
+            top_genres = [{'name': genre, 'count': count} for genre, count in genre_counter.most_common(10)]
+        except Exception:
+            top_genres = []
+        
+        # Top 10 animes más guardados
+        try:
+            top_saved = list(
+                Anime.objects.annotate(
+                    saves_count=Count('in_watchlists')
+                ).filter(saves_count__gt=0).order_by('-saves_count')[:10].values(
+                    'id', 'title', 'cover_image', 'rating', 'saves_count'
+                )
+            )
+        except Exception:
+            top_saved = []
+        
+        # Top 10 animes mejor valorados
+        try:
+            top_rated = list(
+                Anime.objects.filter(rating__gt=0).order_by('-rating')[:10].values(
+                    'id', 'title', 'cover_image', 'rating', 'year'
+                )
+            )
+        except Exception:
+            top_rated = []
+        
+        # Distribución por año (últimos 10 años)
+        current_year = timezone.now().year
+        try:
+            years_distribution = list(
+                Anime.objects.filter(
+                    year__gte=current_year - 10,
+                    year__isnull=False
+                ).values('year').annotate(count=Count('id')).order_by('year')
+            )
+        except Exception:
+            years_distribution = []
+        
+        # Métricas de actividad reciente (últimos 30 días)
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        recent_watchlist = Watchlist.objects.filter(added_at__gte=thirty_days_ago).count()
+        
+        # Actividad por día (últimos 30 días)
+        daily_activity = []
+        for i in range(30):
+            day = timezone.now() - timedelta(days=i)
+            day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_end = day.replace(hour=23, minute=59, second=59, microsecond=999999)
+            
+            count = Watchlist.objects.filter(
+                added_at__gte=day_start,
+                added_at__lte=day_end
+            ).count()
+            
+            daily_activity.append({
+                'date': day.strftime('%Y-%m-%d'),
+                'count': count
+            })
+        
+        daily_activity.reverse()  # Orden cronológico
+        
+        # Distribución por tipo de contenido (solo si existe el campo)
+        try:
+            content_distribution = list(
+                Anime.objects.values('content_type').annotate(count=Count('id'))
+            )
+        except Exception:
+            content_distribution = []
+        
+        # Animes con más episodios
+        top_episodes = list(
+            Anime.objects.filter(episode_count__gt=0).order_by('-episode_count')[:10].values(
+                'id', 'title', 'episode_count', 'cover_image'
+            )
+        )
+        
+        return JsonResponse({
+            'overview': {
+                'total_animes': total_animes,
+                'total_episodes': total_episodes,
+                'total_users': total_users,
+                'total_profiles': total_profiles,
+                'total_watchlist_items': total_watchlist_items,
+                'average_rating': round(avg_rating, 1),
+                'recent_saves_30d': recent_watchlist
+            },
+            'distributions': {
+                'audio_types': audio_distribution,
+                'genres': top_genres,
+                'years': years_distribution,
+                'content_types': content_distribution
+            },
+            'top_animes': {
+                'most_saved': top_saved,
+                'best_rated': top_rated,
+                'most_episodes': top_episodes
+            },
+            'activity': {
+                'daily_saves': daily_activity
+            }
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"[ANALYTICS] Error: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
+
