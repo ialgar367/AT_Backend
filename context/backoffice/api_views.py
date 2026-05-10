@@ -614,7 +614,10 @@ def get_consumet_sources(request, anime_slug, episode_number):
         anime = Anime.objects.get(anime_slug=anime_slug)
         episode = Episode.objects.get(anime=anime, episode_number=episode_number)
         
-        if episode.video_url:
+        # Verificar si tiene video_url y NO es YouTube
+        has_video = episode.video_url and not any(x in episode.video_url for x in ['youtube.com', 'youtu.be'])
+        
+        if has_video:
             print(f"[VIDEO] ✓ Video encontrado: {anime.title} - Episodio {episode_number}")
             return JsonResponse({
                 'sources': [{
@@ -627,7 +630,11 @@ def get_consumet_sources(request, anime_slug, episode_number):
                 'source': 'database'
             })
         else:
-            print(f"[VIDEO] ⚠️ Episodio sin video_url: {anime.title} - Episodio {episode_number}")
+            if episode.video_url and 'youtube' in episode.video_url:
+                print(f"[VIDEO] ⚠️ Ignorando video de YouTube: {anime.title} - Episodio {episode_number}")
+            else:
+                print(f"[VIDEO] ⚠️ Episodio sin video_url: {anime.title} - Episodio {episode_number}")
+            
             return JsonResponse({
                 'sources': [{
                     'url': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
@@ -637,7 +644,7 @@ def get_consumet_sources(request, anime_slug, episode_number):
                 'headers': {},
                 'download': '',
                 'fallback': True,
-                'message': f'El episodio {episode_number} no tiene video configurado. Mostrando video de demostración.'
+                'message': f'El episodio {episode_number} no tiene video MP4 configurado. Mostrando video de demostración.'
             })
             
     except Anime.DoesNotExist:
@@ -793,6 +800,9 @@ def anime_progress(request, anime_id):
         anime = Anime.objects.get(id=anime_id)
     except Anime.DoesNotExist:
         return JsonResponse({'error': 'Anime not found'}, status=404)
+    except Exception as e:
+        print(f"[PROGRESS] Error buscando anime: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
     
     if request.method == 'GET':
         try:
@@ -801,8 +811,8 @@ def anime_progress(request, anime_id):
                 'anime_id': anime.id,
                 'current_episode': progress.current_episode,
                 'watched': progress.watched,
-                'total_episodes': anime.episode_count,
-                'last_watched': progress.last_watched.isoformat()
+                'total_episodes': anime.episode_count or 0,
+                'last_watched': progress.last_watched.isoformat() if progress.last_watched else None
             })
         except WatchProgress.DoesNotExist:
             # No hay progreso aún, retornar valores por defecto
@@ -810,9 +820,14 @@ def anime_progress(request, anime_id):
                 'anime_id': anime.id,
                 'current_episode': 0,
                 'watched': False,
-                'total_episodes': anime.episode_count,
+                'total_episodes': anime.episode_count or 0,
                 'last_watched': None
             })
+        except Exception as e:
+            print(f"[PROGRESS] Error GET: {e}")
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'error': str(e)}, status=500)
     
     elif request.method == 'POST':
         try:
@@ -821,11 +836,12 @@ def anime_progress(request, anime_id):
             watched = data.get('watched', False)
             
             # Validar que current_episode no exceda el total
-            if current_episode > anime.episode_count:
-                current_episode = anime.episode_count
+            episode_count = anime.episode_count or 0
+            if current_episode > episode_count and episode_count > 0:
+                current_episode = episode_count
             
             # Si llegó al último episodio, marcar como watched
-            if current_episode >= anime.episode_count and anime.episode_count > 0:
+            if episode_count > 0 and current_episode >= episode_count:
                 watched = True
             
             # Actualizar o crear progreso
@@ -845,9 +861,13 @@ def anime_progress(request, anime_id):
                 'watched': progress.watched
             })
             
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            print(f"[PROGRESS] JSON Error: {e}")
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
+            print(f"[PROGRESS] Error POST: {e}")
+            import traceback
+            print(traceback.format_exc())
             return JsonResponse({'error': str(e)}, status=500)
 
 
