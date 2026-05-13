@@ -1,24 +1,18 @@
 import json
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import PasswordResetToken
 
 
 @require_GET
 def health(request):
     return JsonResponse({'status': 'ok', 'message': 'Django API activa'})
-
-
-@ensure_csrf_cookie
-@require_GET
-def csrf(request):
-    return JsonResponse({'detail': 'CSRF cookie set'})
 
 
 def _read_json_body(request):
@@ -58,7 +52,8 @@ def register_api(request):
         color='#000000'
     )
     
-    login(request, user)
+    # Generar tokens JWT
+    refresh = RefreshToken.for_user(user)
 
     return JsonResponse(
         {
@@ -68,6 +63,8 @@ def register_api(request):
                 'username': user.username,
                 'email': user.email,
             },
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
         },
         status=201,
     )
@@ -105,7 +102,9 @@ def login_api(request):
             color='#000000'
         )
 
-    login(request, user)
+    # Generar tokens JWT
+    refresh = RefreshToken.for_user(user)
+    
     return JsonResponse(
         {
             'detail': 'Sesión iniciada.',
@@ -114,18 +113,23 @@ def login_api(request):
                 'username': user.username,
                 'email': user.email,
             },
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
         }
     )
 
 
 @require_POST
 def logout_api(request):
-    logout(request)
+    # Con JWT, el logout se maneja en el frontend eliminando el token
+    # No hay sesiones en el servidor que cerrar
     return JsonResponse({'detail': 'Sesión cerrada.'})
 
 
 @require_GET
 def user_api(request):
+    # Con JWT, verificamos si el usuario está autenticado mediante el token
+    # que se verifica automáticamente por JWTAuthentication
     if not request.user.is_authenticated:
         return JsonResponse({'isAuthenticated': False, 'user': None})
 
