@@ -332,9 +332,8 @@ def public_anime_detail(request, pk):
 # Endpoint para actualizar likes
 from django.views.decorators.csrf import csrf_exempt
 
-@login_required
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def update_anime_likes(request, pk):
     """Actualizar el número de likes de un anime"""
     try:
@@ -358,7 +357,7 @@ def update_anime_likes(request, pk):
 JIKAN_BASE_URL = "https://api.jikan.moe/v4"
 
 @admin_only
-@require_http_methods(["GET"])
+@api_view(['GET'])
 def jikan_search(request):
     """Buscar animes en Jikan API (MyAnimeList)"""
     query = request.GET.get('q', '').strip()
@@ -450,7 +449,7 @@ def jikan_search(request):
 
 
 @admin_only
-@require_http_methods(["GET"])
+@api_view(['GET'])
 def jikan_anime_detail(request, mal_id):
     """Obtener detalles completos de un anime desde Jikan API"""
     cache_key = f'jikan_anime_{mal_id}'
