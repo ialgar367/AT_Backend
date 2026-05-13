@@ -361,6 +361,7 @@ def public_anime_detail(request, pk):
         'likes': anime.likes,
         'dislikes': anime.dislikes,
     })
+
 # Endpoint para actualizar likes
 from django.views.decorators.csrf import csrf_exempt
 
@@ -552,10 +553,11 @@ def jikan_anime_detail(request, mal_id):
 @login_required
 @require_http_methods(["GET"])
 def public_anime_list(request):
-    """Endpoint público para listar todos los animes disponibles"""
-    # Obtener parámetros de paginación
+    """Endpoint público para listar y buscar animes disponibles"""
+    # Obtener parámetros de paginación y búsqueda
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
+    search_query = request.GET.get('search', '').strip()
     
     # Validar page_size
     if page_size > 100:
@@ -563,7 +565,23 @@ def public_anime_list(request):
     if page_size < 1:
         page_size = 20
     
-    animes = Anime.objects.all().order_by('-created_at')
+    # Obtener todos los animes
+    animes = Anime.objects.all()
+    
+    # Filtrar por búsqueda si se proporciona
+    if search_query:
+        from django.db.models import Q
+        animes = animes.filter(
+            Q(title__icontains=search_query) |
+            Q(genre__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+        # Ordenar por rating cuando hay búsqueda
+        animes = animes.order_by('-rating', '-created_at')
+    else:
+        # Orden por defecto
+        animes = animes.order_by('-created_at')
+    
     paginator = Paginator(animes, page_size)
     
     try:
@@ -753,14 +771,20 @@ def get_consumet_episodes(request, anime_id):
 @require_http_methods(["GET"])
 def user_progress_list(request):
     """
-    Obtener todo el progreso de visualización del usuario actual
+    Obtener todo el progreso de visualización de los perfiles del usuario actual
     """
+    from context.manager.models import Profile
+    
     try:
         # Verificar que el usuario esté autenticado
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'User not authenticated'}, status=401)
         
-        progress_list = WatchProgress.objects.filter(user=request.user).select_related('anime')
+        # Obtener todos los perfiles del usuario
+        user_profiles = Profile.objects.filter(user=request.user)
+        
+        # Obtener progreso de todos los perfiles del usuario
+        progress_list = WatchProgress.objects.filter(profile__in=user_profiles).select_related('anime', 'profile')
         
         data = []
         for p in progress_list:
@@ -772,7 +796,8 @@ def user_progress_list(request):
                     'current_episode': p.current_episode,
                     'total_episodes': p.anime.episode_count,
                     'watched': p.watched,
-                    'last_watched': p.last_watched.isoformat()
+                    'last_watched': p.last_watched.isoformat(),
+                    'profile_name': p.profile.name
                 })
             except Exception as item_error:
                 # Si hay un error con un item específico, continuar con los demás
@@ -793,9 +818,11 @@ def user_progress_list(request):
 @require_http_methods(["GET", "POST"])
 def anime_progress(request, anime_id):
     """
-    GET: Obtener progreso de un anime específico
-    POST: Actualizar progreso de un anime
+    GET: Obtener progreso de un anime específico para el perfil actual
+    POST: Actualizar progreso de un anime para el perfil actual
     """
+    from context.manager.models import Profile
+    
     try:
         anime = Anime.objects.get(id=anime_id)
     except Anime.DoesNotExist:
@@ -804,9 +831,38 @@ def anime_progress(request, anime_id):
         print(f"[PROGRESS] Error buscando anime: {e}")
         return JsonResponse({'error': str(e)}, status=500)
     
+    # Obtener el perfil actual
+    try:
+        # Obtener profile_id del header o del body (para POST)
+        profile_id = request.headers.get('X-Profile-Id')
+        
+        if request.method == 'POST':
+            try:
+                data = json.loads(request.body)
+                profile_id = data.get('profile_id') or profile_id
+            except:
+                pass
+        
+        if profile_id:
+            current_profile = Profile.objects.get(id=profile_id, user=request.user)
+        else:
+            # Si no hay profile_id, usar el primer perfil del usuario
+            current_profile = Profile.objects.filter(user=request.user).first()
+            
+        if not current_profile:
+            return JsonResponse({'error': 'No profile found for user'}, status=404)
+            
+    except Profile.DoesNotExist:
+        return JsonResponse({'error': 'Profile not found'}, status=404)
+    except Exception as e:
+        print(f"[PROGRESS] Error obteniendo perfil: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
+    
     if request.method == 'GET':
         try:
-            progress = WatchProgress.objects.get(user=request.user, anime=anime)
+            progress = WatchProgress.objects.get(profile=current_profile, anime=anime)
             return JsonResponse({
                 'anime_id': anime.id,
                 'current_episode': progress.current_episode,
@@ -846,7 +902,7 @@ def anime_progress(request, anime_id):
             
             # Actualizar o crear progreso
             progress, created = WatchProgress.objects.update_or_create(
-                user=request.user,
+                profile=current_profile,
                 anime=anime,
                 defaults={
                     'current_episode': current_episode,
@@ -875,11 +931,15 @@ def anime_progress(request, anime_id):
 @require_http_methods(["DELETE"])
 def delete_progress(request, anime_id):
     """
-    Eliminar progreso de un anime (resetear)
+    Eliminar progreso de un anime (resetear) para todos los perfiles del usuario
     """
+    from context.manager.models import Profile
+    
     try:
         anime = Anime.objects.get(id=anime_id)
-        WatchProgress.objects.filter(user=request.user, anime=anime).delete()
+        # Obtener todos los perfiles del usuario y eliminar progreso para todos
+        user_profiles = Profile.objects.filter(user=request.user)
+        WatchProgress.objects.filter(profile__in=user_profiles, anime=anime).delete()
         return JsonResponse({'success': True, 'message': 'Progress deleted'})
     except Anime.DoesNotExist:
         return JsonResponse({'error': 'Anime not found'}, status=404)
