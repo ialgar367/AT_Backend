@@ -91,11 +91,18 @@ def profile_detail(request, pk):
 @api_view(['GET', 'POST'])
 def watchlist(request):
     """Obtener la lista de guardados o agregar un anime"""
-    # Obtener el perfil actual de la sesión
-    profile_id = request.session.get('current_profile_id')
+    # Obtener el perfil actual desde query params (GET) o body (POST)
+    if request.method == "GET":
+        profile_id = request.GET.get('profile_id')
+    else:
+        try:
+            data = json.loads(request.body)
+            profile_id = data.get('profile_id')
+        except:
+            profile_id = None
     
     if not profile_id:
-        return JsonResponse({'error': 'No profile selected'}, status=400)
+        return JsonResponse({'error': 'profile_id is required'}, status=400)
     
     try:
         profile = Profile.objects.get(pk=profile_id, user=request.user)
@@ -198,9 +205,9 @@ def select_profile(request):
 @api_view(['DELETE'])
 def watchlist_remove(request, anime_id):
     """Eliminar un anime de la lista de guardados"""
-    profile_id = request.session.get('current_profile_id')
+    profile_id = request.GET.get('profile_id')
     if not profile_id:
-        return JsonResponse({'error': 'No profile selected'}, status=400)
+        return JsonResponse({'error': 'profile_id is required'}, status=400)
     
     try:
         profile = Profile.objects.get(pk=profile_id, user=request.user)
