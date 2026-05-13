@@ -116,6 +116,14 @@ CSRF_TRUSTED_ORIGINS = config(
     cast=Csv()
 )
 
+# CSRF and Session Cookie settings for cross-origin (Render deployment)
+CSRF_COOKIE_SECURE = not DEBUG  # True in production (HTTPS)
+CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # Must be False for JavaScript to read it
+
+SESSION_COOKIE_SECURE = not DEBUG  # True in production (HTTPS)
+SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+
 # Email configuration (SendGrid API HTTP - Producción)
 EMAIL_BACKEND = 'core.email_backend.SendGridBackend'
 EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY', default='')
