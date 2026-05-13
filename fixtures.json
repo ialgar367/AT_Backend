@@ -1022,7 +1022,7 @@
       "title": "Episodio 1",
       "description": "Episodio 1 de One Piece",
       "duration": 24,
-      "video_url": "http://127.0.0.1:8000/media/one%20piece/1r%20Episodio.mp4",
+      "video_url": "https://drive.google.com/uc?export=download&id=1z7OgiM7RqUxT0-djaU3fbXjnWwpJINZ4",
       "thumbnail": "https://static.wikia.nocookie.net/onepiece/images/5/50/Episodio_1.png/revision/latest/scale-to-width-down/1000?cb=20240912194705&path-prefix=es",
       "created_at": "2026-04-15T15:16:56.240Z"
     }
@@ -1036,7 +1036,7 @@
       "title": "Episodio 2",
       "description": "Episodio 2 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "https://static.wikia.nocookie.net/onepiece/images/1/1d/Episodio_2.png/revision/latest?cb=20240912194550&path-prefix=es",
       "created_at": "2026-04-15T15:16:56.248Z"
     }
@@ -1050,7 +1050,7 @@
       "title": "Episodio 3",
       "description": "Episodio 3 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "https://static.wikia.nocookie.net/onepiece/images/8/86/Episodio_3.png/revision/latest?cb=20200804093917&path-prefix=es",
       "created_at": "2026-04-15T15:16:56.252Z"
     }
@@ -1064,7 +1064,7 @@
       "title": "Episodio 4",
       "description": "Episodio 4 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "https://static.wikia.nocookie.net/onepiece/images/e/ef/Episodio_4.png/revision/latest?cb=20130821163725&path-prefix=es",
       "created_at": "2026-04-15T15:16:56.256Z"
     }
@@ -1078,7 +1078,7 @@
       "title": "Episodio 5",
       "description": "Episodio 5 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "https://static.wikia.nocookie.net/onepiece/images/2/20/Episodio_5.png/revision/latest?cb=20130821164132&path-prefix=es",
       "created_at": "2026-04-15T15:16:56.260Z"
     }
@@ -1092,7 +1092,7 @@
       "title": "Episodio 6",
       "description": "Episodio 6 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.266Z"
     }
@@ -1106,7 +1106,7 @@
       "title": "Episodio 7",
       "description": "Episodio 7 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.271Z"
     }
@@ -1120,7 +1120,7 @@
       "title": "Episodio 8",
       "description": "Episodio 8 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.276Z"
     }
@@ -1134,7 +1134,7 @@
       "title": "Episodio 9",
       "description": "Episodio 9 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.281Z"
     }
@@ -1148,7 +1148,7 @@
       "title": "Episodio 10",
       "description": "Episodio 10 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.287Z"
     }
@@ -1162,7 +1162,7 @@
       "title": "Episodio 11",
       "description": "Episodio 11 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.293Z"
     }
@@ -1176,7 +1176,7 @@
       "title": "Episodio 12",
       "description": "Episodio 12 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.298Z"
     }
@@ -1190,7 +1190,7 @@
       "title": "Episodio 13",
       "description": "Episodio 13 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.304Z"
     }
@@ -1204,7 +1204,7 @@
       "title": "Episodio 14",
       "description": "Episodio 14 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.310Z"
     }
@@ -1218,7 +1218,7 @@
       "title": "Episodio 15",
       "description": "Episodio 15 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.316Z"
     }
@@ -1232,7 +1232,7 @@
       "title": "Episodio 16",
       "description": "Episodio 16 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.321Z"
     }
@@ -1246,7 +1246,7 @@
       "title": "Episodio 17",
       "description": "Episodio 17 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.327Z"
     }
@@ -1260,7 +1260,7 @@
       "title": "Episodio 18",
       "description": "Episodio 18 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.333Z"
     }
@@ -1274,7 +1274,7 @@
       "title": "Episodio 19",
       "description": "Episodio 19 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.340Z"
     }
@@ -1288,7 +1288,7 @@
       "title": "Episodio 20",
       "description": "Episodio 20 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.345Z"
     }
@@ -1302,7 +1302,7 @@
       "title": "Episodio 21",
       "description": "Episodio 21 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.349Z"
     }
@@ -1316,7 +1316,7 @@
       "title": "Episodio 22",
       "description": "Episodio 22 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.356Z"
     }
@@ -1330,7 +1330,7 @@
       "title": "Episodio 23",
       "description": "Episodio 23 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.362Z"
     }
@@ -1344,7 +1344,7 @@
       "title": "Episodio 24",
       "description": "Episodio 24 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.369Z"
     }
@@ -1358,7 +1358,7 @@
       "title": "Episodio 25",
       "description": "Episodio 25 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.384Z"
     }
@@ -1372,7 +1372,7 @@
       "title": "Episodio 26",
       "description": "Episodio 26 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.391Z"
     }
@@ -1386,7 +1386,7 @@
       "title": "Episodio 27",
       "description": "Episodio 27 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.397Z"
     }
@@ -1400,7 +1400,7 @@
       "title": "Episodio 28",
       "description": "Episodio 28 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.405Z"
     }
@@ -1414,7 +1414,7 @@
       "title": "Episodio 29",
       "description": "Episodio 29 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.413Z"
     }
@@ -1428,7 +1428,7 @@
       "title": "Episodio 30",
       "description": "Episodio 30 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.420Z"
     }
@@ -1442,7 +1442,7 @@
       "title": "Episodio 31",
       "description": "Episodio 31 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.427Z"
     }
@@ -1456,7 +1456,7 @@
       "title": "Episodio 32",
       "description": "Episodio 32 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.433Z"
     }
@@ -1470,7 +1470,7 @@
       "title": "Episodio 33",
       "description": "Episodio 33 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.440Z"
     }
@@ -1484,7 +1484,7 @@
       "title": "Episodio 34",
       "description": "Episodio 34 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.447Z"
     }
@@ -1498,7 +1498,7 @@
       "title": "Episodio 35",
       "description": "Episodio 35 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.453Z"
     }
@@ -1512,7 +1512,7 @@
       "title": "Episodio 36",
       "description": "Episodio 36 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.459Z"
     }
@@ -1526,7 +1526,7 @@
       "title": "Episodio 37",
       "description": "Episodio 37 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.464Z"
     }
@@ -1540,7 +1540,7 @@
       "title": "Episodio 38",
       "description": "Episodio 38 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.472Z"
     }
@@ -1554,7 +1554,7 @@
       "title": "Episodio 39",
       "description": "Episodio 39 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.481Z"
     }
@@ -1568,7 +1568,7 @@
       "title": "Episodio 40",
       "description": "Episodio 40 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.487Z"
     }
@@ -1582,7 +1582,7 @@
       "title": "Episodio 41",
       "description": "Episodio 41 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.493Z"
     }
@@ -1596,7 +1596,7 @@
       "title": "Episodio 42",
       "description": "Episodio 42 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.500Z"
     }
@@ -1610,7 +1610,7 @@
       "title": "Episodio 43",
       "description": "Episodio 43 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.506Z"
     }
@@ -1624,7 +1624,7 @@
       "title": "Episodio 44",
       "description": "Episodio 44 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.511Z"
     }
@@ -1638,7 +1638,7 @@
       "title": "Episodio 45",
       "description": "Episodio 45 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.516Z"
     }
@@ -1652,7 +1652,7 @@
       "title": "Episodio 46",
       "description": "Episodio 46 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.520Z"
     }
@@ -1666,7 +1666,7 @@
       "title": "Episodio 47",
       "description": "Episodio 47 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.525Z"
     }
@@ -1680,7 +1680,7 @@
       "title": "Episodio 48",
       "description": "Episodio 48 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.531Z"
     }
@@ -1694,7 +1694,7 @@
       "title": "Episodio 49",
       "description": "Episodio 49 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.538Z"
     }
@@ -1708,7 +1708,7 @@
       "title": "Episodio 50",
       "description": "Episodio 50 de One Piece",
       "duration": 24,
-      "video_url": "https://www.youtube.com/embed/AFuG_6lKQoc",
+      "video_url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "thumbnail": "",
       "created_at": "2026-04-15T15:16:56.545Z"
     }
