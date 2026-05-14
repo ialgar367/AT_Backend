@@ -285,7 +285,20 @@ El equipo de AniToki'''
             html_message=html_content,
         )
     except Exception as e:
-        return JsonResponse({'detail': f'Error al enviar el correo: {str(e)}'}, status=500)
+        error_msg = str(e)
+        
+        # Mensajes más específicos según el error
+        if '401' in error_msg or 'Unauthorized' in error_msg:
+            detail_msg = (
+                'Error de autenticación con el servicio de correo. '
+                'Por favor, contacta al administrador para configurar SENDGRID_API_KEY en las variables de entorno.'
+            )
+        elif 'Connection' in error_msg or 'timeout' in error_msg.lower():
+            detail_msg = 'Error de conexión con el servicio de correo. Inténtalo de nuevo más tarde.'
+        else:
+            detail_msg = f'Error al enviar el correo: {error_msg}'
+        
+        return JsonResponse({'detail': detail_msg}, status=500)
 
     return JsonResponse({'detail': 'Te hemos enviado las instrucciones al correo. Si no lo ves, revisa tu carpeta de spam.'}, status=200)
 
