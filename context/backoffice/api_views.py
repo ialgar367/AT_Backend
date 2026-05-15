@@ -41,8 +41,9 @@ def update_anime_dislikes(request, pk):
         return JsonResponse({'error': str(e)}, status=400)
 
 
-@admin_only
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@admin_only
 def anime_list(request):
     if request.method == "GET":
         # Obtener parámetros de paginación
@@ -127,8 +128,9 @@ def anime_list(request):
             return JsonResponse({'error': str(e)}, status=400)
 
 
-@admin_only
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@admin_only
 def anime_detail(request, pk):
     try:
         anime = Anime.objects.get(pk=pk)
@@ -376,8 +378,9 @@ def update_anime_likes(request, pk):
 
 JIKAN_BASE_URL = "https://api.jikan.moe/v4"
 
-@admin_only
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@admin_only
 def jikan_search(request):
     """Buscar animes en Jikan API (MyAnimeList)"""
     query = request.GET.get('q', '').strip()
@@ -468,8 +471,9 @@ def jikan_search(request):
         }, status=500)
 
 
-@admin_only
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@admin_only
 def jikan_anime_detail(request, mal_id):
     """Obtener detalles completos de un anime desde Jikan API"""
     cache_key = f'jikan_anime_{mal_id}'
